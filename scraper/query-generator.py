@@ -19,6 +19,7 @@ class VaccineQueryGenerator:
             "cults",
             "religious convictions",
             "morals",
+            "trust in government"
         ]
         self.policies = [
             "vaccine programs",
