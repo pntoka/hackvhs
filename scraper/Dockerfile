@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y \
     libxss1 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY ../requirements.txt .
 COPY main.py .
 COPY .env .
 
