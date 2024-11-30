@@ -21,43 +21,36 @@ class VaccineQueryGenerator:
             "morals",
             "trust in government"
         ]
-        self.policies = [
-            "vaccine programs",
-            "promotion and communication",
-            "safety evaluation and monitoring"
-        ]
         self.recommendations = [
             "training",
             "communication skill",
             "medical and epidemiological knowledge",
-            "may be vaccine hesitant themselves"
         ]
         self.forums = [
-            "vaccine confidence project",
             "reddit.com",
-            "twitter",
-            "X.com",
-            "facebook",
-            "meta",
-            "mumsnet"
+            "facebook.com",
         ]
         self.base_topics = [
-            "vaccine reluctance",
+            "anti-vax",
+            "vaccine reluctancy",
             "vaccine side effects",
-            "vaccine low coverage",
-            "vaccine microchips",
+            "microchips in vaccines",
             "vaccine hesitancy",
             "vaccination misinformation",
             "public perception of vaccines",
             "vaccination trends",
-            "community engagement in vaccination"
+            "vaccine misinformation",
+            "vaccination myths",
+            "vaccine programs",
+            "vaccine safety",
         ]
         self.perspectives = [
-            "cultural barriers",
-            "religious views",
-            "medical concerns",
-            "socioeconomic factors",
-            "educational background"
+            "cultural",
+            "religious",
+            "medical",
+            "socioeconomic",
+            "educational",
+            "political"
         ]
         
         self.demographics = [
@@ -68,19 +61,32 @@ class VaccineQueryGenerator:
             "elderly population",
             "developed countries",
             "developing countries",
-            "suburban communities"
+            "suburban communities",
+            "low-income communities",
+            "high-income communities",
+            "middle-class communities",
+            "highly educated individuals",
+            "religious communities",
         ]
     
-    def generate_query(self):
-        context = random.choice(self.context)
-        topic = random.choice(self.base_topics)
-        perspective = random.choice(self.perspectives)
-        demographic = random.choice(self.demographics)
-        forum = random.choice(self.forums)
+    def generate_query(self, topic=None, n=5):
+        if topic is None:
+            topic = random.choice(self.base_topics)
+        else:
+            topic = topic
+        context = random.choices(self.context, k=n)
+        perspective = random.choices(self.perspectives, k=n)
+        demographic = random.choices(self.demographics, k=n)
+        forum = random.choices(self.forums, k=n)
         
-        query_templates = [
-            f"{topic} in {demographic} {forum}",
-            f"how {context} affects {topic} {forum}",
-            f"{perspective} on {topic} {forum}",
-        ]
-        return random.choice(query_templates)
+        query_templates = []
+        for i in range(n):
+            query_templates.append([
+                f"site:{forum[i]} {topic}",
+                f"site:{forum[i]} {demographic[i]} and {topic}",
+                f"site:{forum[i]} {perspective[i]} view on {topic}",
+                f"site:{forum[i]} {demographic[i]} view on {topic}",
+                f"site:{forum[i]} {context[i]} and {topic}"
+            ])
+        
+        return [q for qset in query_templates for q in qset]
