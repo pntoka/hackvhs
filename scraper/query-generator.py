@@ -34,7 +34,6 @@ class VaccineQueryGenerator:
         ]
         self.forums = [
             "vaccine confidence project",
-
         ]
         self.base_topics = [
             "vaccine reluctant",
@@ -61,6 +60,9 @@ class VaccineQueryGenerator:
             "ethnic minorities",
             "young parents",
             "elderly population",
+            "developed countries",
+            "developing countries",
+            "suburban communities"
         ]
     
     def generate_query(self):
