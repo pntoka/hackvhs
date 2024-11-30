@@ -34,12 +34,18 @@ class VaccineQueryGenerator:
         ]
         self.forums = [
             "vaccine confidence project",
+            "reddit.com",
+            "twitter",
+            "X.com",
+            "facebook",
+            "meta",
+            "mumsnet"
         ]
         self.base_topics = [
-            "vaccine reluctant",
+            "vaccine reluctance",
             "vaccine side effects",
             "vaccine low coverage",
-            "microchips",
+            "vaccine microchips",
             "vaccine hesitancy",
             "vaccination misinformation",
             "public perception of vaccines",
@@ -66,18 +72,15 @@ class VaccineQueryGenerator:
         ]
     
     def generate_query(self):
-        # TODO: make some combos from the above
+        context = random.choice(self.context)
         topic = random.choice(self.base_topics)
         perspective = random.choice(self.perspectives)
         demographic = random.choice(self.demographics)
+        forum = random.choice(self.forums)
         
         query_templates = [
-            f"{topic} in {demographic}",
-            f"impact of {perspective} on {topic}",
-            f"{demographic} attitudes towards vaccination",
-            f"addressing {topic} through {perspective}",
-            f"{perspective} affecting {demographic} vaccination rates"
+            f"{topic} in {demographic} {forum}",
+            f"how {context} affects {topic} {forum}",
+            f"{perspective} on {topic} {forum}",
         ]
         return random.choice(query_templates)
-    
-    # TODO: incorporate query-generator into tavily search client in main.py
