@@ -30,21 +30,25 @@ class VaccineQueryGenerator:
             "training",
             "communication skill",
             "medical and epidemiological knowledge",
-            "may be vaccine hesitant themselves"
         ]
         self.forums = [
             "vaccine confidence project",
+            "reddit",
+            "twitter",
+            "facebook",
         ]
         self.base_topics = [
-            "vaccine reluctant",
+            "vaccine reluctancy",
             "vaccine side effects",
             "vaccine low coverage",
-            "microchips",
+            "microchips in vaccines",
             "vaccine hesitancy",
             "vaccination misinformation",
             "public perception of vaccines",
             "vaccination trends",
-            "community engagement in vaccination"
+            "community engagement in vaccination",
+            "vaccine misinformation",
+            "vaccination myths"
         ]
         self.perspectives = [
             "cultural barriers",
@@ -62,22 +66,36 @@ class VaccineQueryGenerator:
             "elderly population",
             "developed countries",
             "developing countries",
-            "suburban communities"
+            "suburban communities",
+            "low-income communities",
+            "high-income communities",
+            "middle-class communities",
+            "highly educated individuals",
+            "religious communities",
         ]
     
-    def generate_query(self):
+    def generate_query(self, topic=None):
         # TODO: make some combos from the above
-        topic = random.choice(self.base_topics)
+        if topic is None:
+            topic = random.choice(self.base_topics)
+        else:
+            topic = topic
         perspective = random.choice(self.perspectives)
         demographic = random.choice(self.demographics)
+        forum = random.choice(self.forums)
+        policy = random.choice(self.policies)
+        recommendation = random.choice(self.recommendations)
         
         query_templates = [
             f"{topic} in {demographic}",
             f"impact of {perspective} on {topic}",
             f"{demographic} attitudes towards vaccination",
-            f"addressing {topic} through {perspective}",
-            f"{perspective} affecting {demographic} vaccination rates"
+            f"{perspective} affecting {demographic} vaccination rates",
+            f"{forum} discussions on {topic}",
+            f"impact of {policy} in addressing {topic}",
+            f"{recommendation} for addressing {topic}",
         ]
-        return random.choice(query_templates)
+        
+        return query_templates
     
     # TODO: incorporate query-generator into tavily search client in main.py
