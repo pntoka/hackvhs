@@ -9,8 +9,8 @@ import json
 # import nltk
 # nltk.download('vader_lexicon')
 # from nltk.sentiment.vader import SentimentIntensityAnalyzer
-# from sklearn.feature_extraction.text import TfidfVectorizer
-# from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 import networkx as nx
 
 def load_tweet_data():
