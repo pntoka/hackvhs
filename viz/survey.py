@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-PROFILING_AGENT_ADDRESS = "agent1q25afna9fmuvndftnv3p8rhrqr5y8halg6832t2cxp8hwvvzqzpwvc2sdf3"
+PROFILING_AGENT_ADDRESS = ""   #Add profiling agent adress after running profiling_agent.py
 
 def create_survey():
     run_chat = False
