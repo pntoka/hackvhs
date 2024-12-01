@@ -40,8 +40,8 @@ def webhook():
         # Parse the incoming message
         data = request.get_data().decode('utf-8')
         message = parse_message_from_agent(data)
-        message_2 = message.payload.get("survey_responses","")
-        profile = message_2.get("profile", "")
+        #message_2 = message.payload.get("survey_responses","")
+        profile = message.payload.get("profile", "")
         agent_address = message.sender
         logger.info("B")
         if not profile:
