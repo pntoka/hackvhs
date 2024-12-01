@@ -12,13 +12,17 @@ if __name__ == '__main__':
     np.random.seed(20)
     st.set_page_config(layout="wide", page_title="Vax Vibes")
 
+    # Initialize session state for survey visibility
     if 'show_survey' not in st.session_state:
         st.session_state.show_survey = False
-    
-    # Create a container for the button
+
+    def toggle_survey():
+        st.session_state.show_survey = not st.session_state.show_survey
+
+    # Create the fixed button using Streamlit components
     button_container = st.container()
 
-    # Add the button with JavaScript onclick event
+    # Add the styled button
     button_container.markdown("""
     <style>
         .fixed-button {
@@ -40,12 +44,20 @@ if __name__ == '__main__':
         }
     </style>
     <button class="fixed-button"
-        onclick="document.querySelector('[data-testid=\'stSidebarNav\']').click();"><b>Q</b>&nbsp;&nbsp;&nbsp;&nbsp;<i>Discover Your Vaccine Profile</i></button>
+    onclick=toggle_survey><b>Q</b>&nbsp;&nbsp;&nbsp;&nbsp;<i>Discover Your Vaccine Profile</i></button>
 """, unsafe_allow_html=True)
-    
-    with st.sidebar:
-        if st.session_state.show_survey:
-            create_survey()
+
+    # Add Streamlit button with callback
+    button_container.button(
+        "Q Discover Your Vaccine Profile",
+        key="survey_button",
+        on_click=toggle_survey,
+        help="Click to take the survey"
+    )
+
+    # Display survey when button is clicked
+    if st.session_state.show_survey:
+        create_survey()
         
     tab2, tab3 = st.tabs(["Dashboard", "Patient Journey"])
 
