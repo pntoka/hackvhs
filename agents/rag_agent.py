@@ -5,12 +5,15 @@ from flask import Flask, request, jsonify
 from fetchai.crypto import Identity
 from fetchai.registration import register_with_agentverse
 from fetchai.communication import parse_message_from_agent, send_message_to_agent
-import openai
+import requests  # Import requests for HTTP calls to Vectara API
+import json
+from types import SimpleNamespace
 
 load_dotenv()
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
@@ -18,8 +21,17 @@ app = Flask(__name__)
 # Identity for the RAG agent
 rag_identity = None
 
-# Initialize OpenAI API key
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Vectara API key and corpus key from environment variables
+VECTARA_API_KEY = "zut_I9uYzUybNaZNP_5_LGJ13ylo8Reaxm7FRinmkA"
+CORPUS_KEY = "Testing"
+VECTARA_API_URL = "https://api.vectara.io/v2/chats"
+
+# Ensure API keys are loaded
+if not VECTARA_API_KEY or not CORPUS_KEY:
+    logger.error("Vectara API key or corpus key not set in environment variables.")
+    exit(1)
+
+logger.info("A")
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
@@ -28,12 +40,13 @@ def webhook():
         # Parse the incoming message
         data = request.get_data().decode('utf-8')
         message = parse_message_from_agent(data)
-        profile = message.payload.get("profile", "")
+        message_2 = message.payload.get("survey_responses","")
+        profile = message_2.get("profile", "")
         agent_address = message.sender
-
+        logger.info("B")
         if not profile:
             return jsonify({"status": "error", "message": "No profile provided"}), 400
-
+        logger.info("C")
         # Generate response based on profile
         rag_response = generate_rag_response(profile)
 
@@ -50,28 +63,83 @@ def webhook():
         logger.error(f"Error in RAG agent webhook: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
+
 def generate_rag_response(profile):
-    """Generate a response based on the user profile using RAG."""
+    """Generate a response based on the user profile using Vectara RAG."""
     try:
-        # Use OpenAI API to generate a response
+        # Use Vectara API to generate a response
         prompt = (
-            f"Given the following user profile: {profile}, "
-            "provide tailored recommendations or information relevant to the user's interests and needs."
+            f"""You are an assistant helping users who are vaccine-hesitant.
+            Your goal is to provide clear, factual information to address their concerns.
+
+            Based on the following profile, provide a response that gently informs and supports the user.
+            PROFILE: {profile}
+
+            Limit your response to 200 words.
+            """
         )
-        response = openai.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "You are an assistant that provides recommendations based on user profiles."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7
-        )
-        rag_response = response.choices[0].message.content.strip()
-        logger.info(f"Generated RAG response: {rag_response}")
-        return rag_response
+        logger.info("D")
+        ctx = SimpleNamespace(logger=logger)  # Create a simple context with a logger
+        chat_id, response = create_chat(prompt, ctx)
+        logger.info("E")
+        if response:
+            logger.info(f"Generated RAG response: {response}")
+            return response
+        else:
+            logger.error("No response received from Vectara.")
+            return "No response available."
     except Exception as e:
         logger.error(f"Error generating RAG response: {e}")
-        return ""
+        return "An error occurred while generating the response."
+
+
+def create_chat(query, ctx):
+    url = VECTARA_API_URL
+
+    payload = {
+        "query": query,
+        "search": {
+            "corpora": [
+                {
+                    "corpus_key": CORPUS_KEY,
+                    "semantics": "default"  # Using default semantics without any advanced settings
+                }
+            ],
+            "offset": 0,
+            "limit": 5  # Limiting to 5 results as a basic feature
+        },
+        "chat": {
+            "store": True  # Store the chat message and response
+        }
+    }
+
+    # Log the payload before the request, without serializing `ctx`
+    #ctx.logger.info(f"Sending request to Vectara with payload: {json.dumps(payload)}")
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'x-api-key': VECTARA_API_KEY
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+
+        # Log the full response details for debugging
+        ctx.logger.info(f"Response status code: {response.status_code}")
+        ctx.logger.info(f"Response body: {response.text}")
+
+        if response.status_code == 200:
+            chat_data = response.json()
+            ctx.logger.info(f"Chat created successfully with ID: {chat_data.get('chat_id', 'N/A')}")
+            return chat_data.get('chat_id'), chat_data.get('answer', '')
+        else:
+            ctx.logger.info(f"Failed to create chat. Status Code: {response.status_code}, Response: {response.text}")
+            return None, "Failed to get response from Vectara."
+    except Exception as e:
+        ctx.logger.info(f"An error occurred while trying to create a chat: {e}")
+        return None, f"An error occurred: {e}"
+
 
 def init_agent():
     global rag_identity
@@ -104,8 +172,8 @@ def init_agent():
         logger.error(f"Error initializing RAG agent: {e}")
         raise
 
+
 if __name__ == "__main__":
     load_dotenv()
-    openai.api_key = os.getenv("OPENAI_API_KEY")
     init_agent()
     app.run(host="0.0.0.0", port=5009, debug=True, use_reloader=False)
