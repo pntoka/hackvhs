@@ -1,16 +1,16 @@
 import streamlit as st
 import pandas as pd
-from sentence_transformers import SentenceTransformer
-from sklearn.cluster import KMeans
+# from sentence_transformers import SentenceTransformer
+# from sklearn.cluster import KMeans
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 import json
-import nltk
-nltk.download('vader_lexicon')
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+# import nltk
+# nltk.download('vader_lexicon')
+# from nltk.sentiment.vader import SentimentIntensityAnalyzer
+# from sklearn.feature_extraction.text import TfidfVectorizer
+# from sklearn.metrics.pairwise import cosine_similarity
 import networkx as nx
 
 def load_tweet_data():
@@ -122,25 +122,25 @@ def create_quadrant_chart(df):
     fig.add_annotation(x=0.5, y=0, text='Passive', showarrow=False, font=dict(size=14))
     return fig
 
-def process_data(json_file='sentiment_data.json', k=25):
-    with open(json_file, 'r') as f:
-        json_data = json.load(f)
+# def process_data(json_file='sentiment_data.json', k=25):
+#     with open(json_file, 'r') as f:
+#         json_data = json.load(f)
     
-    df = pd.DataFrame.from_dict(json_data, orient='index')
-    df = df.drop(columns = 'content')
-    model = SentenceTransformer('distilbert-base-nli-mean-tokens')
-    text_features = df['title'].tolist()
-    embeddings = model.encode(text_features, show_progress_bar=True)
-    normalized_embeddings = embeddings / np.linalg.norm(embeddings, axis=1)[:, np.newaxis]
-    kmeans = KMeans(n_clusters=k, random_state=42)
-    df['cluster'] = kmeans.fit_predict(normalized_embeddings)
-    df['embeddings'] = embeddings.tolist()
-    sid = SentimentIntensityAnalyzer()
-    df['negative'] = df['title'].apply(lambda x: sid.polarity_scores(x)['neg'])
-    df['neutral'] = df['title'].apply(lambda x: sid.polarity_scores(x)['neu'])
-    df['positive'] = df['title'].apply(lambda x: sid.polarity_scores(x)['pos'])
-    df['sentiment_compound'] = df['title'].apply(lambda x: sid.polarity_scores(x)['compound'])
-    return df
+#     df = pd.DataFrame.from_dict(json_data, orient='index')
+#     df = df.drop(columns = 'content')
+#     model = SentenceTransformer('distilbert-base-nli-mean-tokens')
+#     text_features = df['title'].tolist()
+#     embeddings = model.encode(text_features, show_progress_bar=True)
+#     normalized_embeddings = embeddings / np.linalg.norm(embeddings, axis=1)[:, np.newaxis]
+#     kmeans = KMeans(n_clusters=k, random_state=42)
+#     df['cluster'] = kmeans.fit_predict(normalized_embeddings)
+#     df['embeddings'] = embeddings.tolist()
+#     sid = SentimentIntensityAnalyzer()
+#     df['negative'] = df['title'].apply(lambda x: sid.polarity_scores(x)['neg'])
+#     df['neutral'] = df['title'].apply(lambda x: sid.polarity_scores(x)['neu'])
+#     df['positive'] = df['title'].apply(lambda x: sid.polarity_scores(x)['pos'])
+#     df['sentiment_compound'] = df['title'].apply(lambda x: sid.polarity_scores(x)['compound'])
+#     return df
 
 def plot_bubble(df):
     G = nx.Graph()

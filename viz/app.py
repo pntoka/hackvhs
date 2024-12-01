@@ -22,7 +22,7 @@ if __name__ == '__main__':
     # Create the fixed button using Streamlit components
     button_container = st.container()
 
-    # Add the styled button
+    # Add the button with JavaScript onclick event
     button_container.markdown("""
     <style>
         .fixed-button {
@@ -44,11 +44,11 @@ if __name__ == '__main__':
         }
     </style>
     <button class="fixed-button"
-    onclick=toggle_survey><b>Q</b>&nbsp;&nbsp;&nbsp;&nbsp;<i>Discover Your Vaccine Profile</i></button>
+    onclick=create_survey()><b>Q</b>&nbsp;&nbsp;&nbsp;&nbsp;<i>Discover Your Vaccine Profile</i></button>
 """, unsafe_allow_html=True)
 
     # Add Streamlit button with callback
-    button_container.button(
+    st.button(
         "Q Discover Your Vaccine Profile",
         key="survey_button",
         on_click=toggle_survey,
@@ -58,8 +58,8 @@ if __name__ == '__main__':
     # Display survey when button is clicked
     if st.session_state.show_survey:
         create_survey()
-        
-    tab2, tab3 = st.tabs(["Dashboard", "Patient Journey"])
+    
+    tab1, tab2, tab3 = st.tabs(["Dashboard", "Patient Journey"])
 
     with tab2:
         # df = process_data()"Do you think the reduction in deaths and improved health shown here could be possible without vaccines?"
