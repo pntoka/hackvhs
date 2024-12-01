@@ -1,6 +1,16 @@
 import streamlit as st
 
 def create_survey():
+    st.markdown(
+    """
+    <style>
+        section[data-testid="stSidebar"] {
+            width: 650px !important; # Set the width to your desired value
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+    )
     with st.sidebar:
         # Question 1: Slider for hesitancy scale
         st.header("Hesitancy Scale")
