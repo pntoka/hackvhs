@@ -11,7 +11,7 @@ To run the demo:
 - rag_agent address added to `agents/orchestrator_agent.py`
 - profiling_agent address added to `viz/survey.py`
 
-3. Run orchestratro (`agents/orchestrator_agent.py`)
+3. Run orchestrator (`agents/orchestrator_agent.py`)
 
 4. Run the frontend app
 `$ streamlit run viz/app.py`
