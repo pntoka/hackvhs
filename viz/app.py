@@ -59,9 +59,9 @@ if __name__ == '__main__':
     if st.session_state.show_survey:
         create_survey()
     
-    tab1, tab2, tab3 = st.tabs(["Dashboard", "Patient Journey"])
+    tab1, tab2, tab3 = st.tabs(["Dashboard", "Chat", "Patient Journey"])
 
-    with tab2:
+    with tab1:
         # df = process_data()"Do you think the reduction in deaths and improved health shown here could be possible without vaccines?"
         # df.to_csv('sentiment_tag.csv')
 
@@ -168,6 +168,10 @@ if __name__ == '__main__':
         
         st.subheader(f"Tell Me More")
         st.write(sub[['title','url','negative','positive','neutral']], use_container_width=True)
+
+    with tab2:
+        # Initialize chat history
+        st.write()
 
     with tab3:
         C1, C2 = st.columns([1,1])
