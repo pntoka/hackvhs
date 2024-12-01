@@ -8,8 +8,7 @@ import logging
 import os
 from dotenv import load_dotenv
 
-RAG_AGENT_ADDRESS = "agent1q0wnue0q2ddyyya8vklh2lpk4cy0yvfqwwqycc8nwgz0x0z7qhsjj0ewtlr"
-ORCHESTRATOR_AGENT = "banana"
+RAG_AGENT_ADDRESS = ""  # Add the rag agent adress after running the rag_agent.py
 
 load_dotenv()
 
