@@ -1,26 +1,53 @@
 import streamlit as st
 import pandas as pd
-from sentence_transformers import SentenceTransformer
-from sklearn.cluster import KMeans
 import plotly.express as px
-import plotly.graph_objects as go
 import numpy as np
 import json
-import nltk
-nltk.download('vader_lexicon')
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
-import networkx as nx
 import ast
-import webbrowser
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from plotting import *
+from survey import create_survey
 
 
 if __name__ == '__main__':
     np.random.seed(20)
     st.set_page_config(layout="wide", page_title="Vax Vibes")
-    tab1, tab2, tab3 = st.tabs(["README", "Dashboard", "Patient Journey"])
+
+    if 'show_survey' not in st.session_state:
+        st.session_state.show_survey = False
+    
+    # Create a container for the button
+    button_container = st.container()
+
+    # Add the button with JavaScript onclick event
+    button_container.markdown("""
+    <style>
+        .fixed-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: white;
+            color: black;
+            border-radius: 30px;
+            border: 2px solid black;
+            cursor: pointer;
+            z-index: 999;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            font-size: 24px;
+        }
+        .fixed-button:hover {
+            background-color: #1991DA;
+        }
+    </style>
+    <button class="fixed-button"
+        onclick="document.querySelector('[data-testid=\'stSidebarNav\']').click();"><b>Q</b>&nbsp;&nbsp;&nbsp;&nbsp;<i>Discover Your Vaccine Profile</i></button>
+""", unsafe_allow_html=True)
+    
+    with st.sidebar:
+        if st.session_state.show_survey:
+            create_survey()
+        
+    tab2, tab3 = st.tabs(["Dashboard", "Patient Journey"])
 
     with tab2:
         # df = process_data()"Do you think the reduction in deaths and improved health shown here could be possible without vaccines?"
@@ -149,7 +176,7 @@ if __name__ == '__main__':
             
             quad_chart = create_quadrant_chart(q_points)
             st.plotly_chart(quad_chart, use_container_width=True)
-            point = st.selectbox("Select Touchpoint to Vie", q_points['Name'], index=None)
+            point = st.selectbox("Select Touchpoint for More Details", q_points['Name'], index=None)
             if point == '2':
                 st.write("`RAG Agent Triggered` Logic/Reason")
                 st.write("Agent deduced that the patient wanted to know more about realized health benefits of vaccinations.")
