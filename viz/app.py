@@ -6,7 +6,8 @@ import json
 import ast
 from plotting import *
 from survey import create_survey
-
+import requests
+from datetime import datetime
 
 if __name__ == '__main__':
     np.random.seed(20)
@@ -54,10 +55,10 @@ if __name__ == '__main__':
         on_click=toggle_survey,
         help="Click to take the survey"
     )
-
+    trigger_chat = False
     # Display survey when button is clicked
     if st.session_state.show_survey:
-        create_survey()
+        trigger_chat = create_survey()
     
     tab1, tab2, tab3 = st.tabs(["Dashboard", "Chat", "Patient Journey"])
 
@@ -171,7 +172,15 @@ if __name__ == '__main__':
 
     with tab2:
         # Initialize chat history
-        st.write()
+        if trigger_chat:
+            try:
+                response = requests.get('http://localhost:5002/api/get-rag-response', timeout=10)
+                if response.status_code == 200:
+                    message = response.json()['rag_response']
+                    with st.chat_message("assistant"):
+                        st.markdown(message)
+            except Exception as e:
+                st.write(e)
 
     with tab3:
         C1, C2 = st.columns([1,1])

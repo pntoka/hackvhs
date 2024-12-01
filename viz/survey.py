@@ -4,6 +4,7 @@ import requests
 PROFILING_AGENT_ADDRESS = "agent1q25afna9fmuvndftnv3p8rhrqr5y8halg6832t2cxp8hwvvzqzpwvc2sdf3"
 
 def create_survey():
+    run_chat = False
     st.markdown(
     """
     <style>
@@ -117,9 +118,11 @@ def create_survey():
                 if response.status_code == 200:
                     st.success("Survey submitted successfully!")
                     st.json(response.json())  # Display server response
+                    run_chat = True
                 else:
                     st.error(f"Failed to submit survey: {response.status_code}")
                     st.text(response.text)
             except Exception as e:
                 st.error("An error occurred while submitting the survey.")
                 st.text(str(e))
+    return run_chat
