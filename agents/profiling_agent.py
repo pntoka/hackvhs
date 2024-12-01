@@ -21,6 +21,7 @@ profiling_identity = None
 
 # Initialize OpenAI API key
 openai.api_key = os.getenv("OPENAI_API_KEY")
+# openai.api_key = os.getenv("OPENAI_API_KEY_2")
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
@@ -65,10 +66,12 @@ def generate_profile(survey_responses):
         #     json_data = json.load(file)  # Parse JSON into a Python dictionary or list
 
         prompt = (
-            f"Given the following survey responses: {survey_responses}, "
-            "generate a comprehensive user profile summarizing their preferences, behaviors, and characteristics."
+            f"""Using the provided survey responses: {survey_responses}, create a detailed user profile. 
+            This profile should summarize key insights, including the individual's preferences, behaviors, characteristics, 
+            and any notable patterns or trends observed in their responses. Keep it within 150 words.
+            """
         )
-        logger.info("3")
+        logger.info("3", openai.api_key)
         response = openai.chat.completions.create(
             model="gpt-4o",
             messages=[

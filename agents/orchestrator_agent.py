@@ -8,6 +8,9 @@ import logging
 import os
 from dotenv import load_dotenv
 
+RAG_AGENT_ADDRESS = "agent1q0wnue0q2ddyyya8vklh2lpk4cy0yvfqwwqycc8nwgz0x0z7qhsjj0ewtlr"
+ORCHESTRATOR_AGENT = "banana"
+
 load_dotenv()
 
 # Configure logging
@@ -26,7 +29,7 @@ def init_client():
     global client_identity
     try:
         # Load the client identity from environment variables
-        client_identity = Identity.from_seed("banana", 0)
+        client_identity = Identity.from_seed(os.getenv("CLIENT_KEY"), 0)
         logger.info(f"Client agent started with address: {client_identity.address}")
 
         # Define the client agent's metadata
@@ -110,9 +113,8 @@ def send_survey():
         # Prepare and send the payload to the agent
         payload = {"survey_responses": survey_responses}
         send_message_to_agent(
-            client_identity,
-            agent_address,  # Frontend client identity
-                # Profiling agent address
+            client_identity, # Frontend client identity
+            agent_address,  # Profiling agent address
             payload           # Payload containing the survey responses
         )
 
@@ -121,6 +123,7 @@ def send_survey():
     except Exception as e:
         logger.error(f"Error sending survey responses: {e}")
         return jsonify({"error": str(e)}), 500
+
 
 @app.route('/api/get-rag-response', methods=['GET'])
 def get_rag_response():
@@ -165,7 +168,7 @@ def webhook():
 
             #     logger.info(f"Sending profile to RAG agent at {rag_agent_address}")
 
-            rag_agent_address = "agent1qg5q3xygttrcpxm3hqhqcyjjx2yymcnh7mxh60565rxzjn0vczej52ynglr"
+            rag_agent_address = RAG_AGENT_ADDRESS
             # Send the profile to the RAG agent
             payload = {"profile": profile_response}
             send_message_to_agent(
