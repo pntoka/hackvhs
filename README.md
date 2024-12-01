@@ -6,6 +6,9 @@ CLIENT_KEY="apple"
 PROFILING_AGENT_KEY = "kiwis"
 RAG_AGENT_KEY = "chickens"
 OPENAI_API_KEY="your_api_key"
+
+# This needs to be our VECTARA_API as we have a Corpus based on documents
+# from the WHO for our RAG
 VECTARA_API = "zut_I9uYzUybNaZNP_5_LGJ13ylo8Reaxm7FRinmkA"
 AGENTVERSE_API_KEY="your_agentverse_api_key"
 ```
