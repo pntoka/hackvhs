@@ -1,0 +1,43 @@
+{
+    "start":
+    {
+        "1": "[2024-12-01 16:04:33] patient enters portal",
+        "2": "[2024-12-01 16:06:21] patient views cluster [18] which is about [doctor's views on medical and religious exemptions]",
+        "3": "[2024-12-01 16:07:58] patient reads article [Vaccines and Sudden Infant Death Syndrome (SIDS) | Vaccine Safety]",
+        "4": "[2024-12-01 16:12:11] patient writes [I'm healthy so why bother]",
+        "5": "[2024-12-01 16:14:43] patient [likes] tweet [A �healthy� doctor died two weeks after getting a COVID-19 vaccine; CDC is investigating why. #Vaccine #PfizerBioNTech https://t.co/56YFhdxHP0]"
+    },
+    "survey":
+    {
+        "Q1": "patient vaccine hesitancy level = [7]",
+        "Q2": "patient [never] under what circumstances would you get a FDA approved vaccine",
+        "Q3": "patient hesitant about vaccines because [I think the government is controlling my mind]",
+        "Q4": "patient believes [side effects outweigh benefits], [worries about long term effect on health]",
+        "Q5": {
+            "NEUTRAL": 
+            "I vaccinated my children because I believe in protecting them and others in my community. It’s not just about personal choice; it’s about social responsibility to shield those who can’t get vaccinated, like kids with immune disorders."
+        },
+        "Q6": {
+            "AGREE":
+            "The body has a natural immune system for a reason. Overloading it with synthetic vaccines can disrupt its balance and lead to other health issues down the road."
+        },
+        "Q7": {
+            "AGREE":
+            "The rise in autoimmune diseases correlates suspiciously with the increase in vaccination schedules. I’m not saying vaccines are the only cause, but it’s a risk I’m not willing to take without more definitive answers."
+        }
+    },
+    "conversation":
+    {
+        "user": "...",
+        "assistant": "...",
+        "best agent": "peer-based",
+        "logic score": "0.49",
+        "peer-based score": "0.67",
+        "emotion score": "0.21"
+    },
+    "endpoint":
+    {
+        "book appointment": "patient does not book",
+        "follow-up": "patient opts for reminder in 1 month"
+    }
+}

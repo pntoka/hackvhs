@@ -12,196 +12,150 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import networkx as nx
 import ast
 import webbrowser
-
-
-def process_data(json_file='sentiment_data.json', k=25):
-    with open(json_file, 'r') as f:
-        json_data = json.load(f)
-    
-    df = pd.DataFrame.from_dict(json_data, orient='index')
-    df = df.drop(columns = 'content')
-    model = SentenceTransformer('distilbert-base-nli-mean-tokens')
-    text_features = df['title'].tolist()
-    embeddings = model.encode(text_features, show_progress_bar=True)
-    normalized_embeddings = embeddings / np.linalg.norm(embeddings, axis=1)[:, np.newaxis]
-    kmeans = KMeans(n_clusters=k, random_state=42)
-    df['cluster'] = kmeans.fit_predict(normalized_embeddings)
-    df['embeddings'] = embeddings.tolist()
-    sid = SentimentIntensityAnalyzer()
-    df['negative'] = df['title'].apply(lambda x: sid.polarity_scores(x)['neg'])
-    df['neutral'] = df['title'].apply(lambda x: sid.polarity_scores(x)['neu'])
-    df['positive'] = df['title'].apply(lambda x: sid.polarity_scores(x)['pos'])
-    df['sentiment_compound'] = df['title'].apply(lambda x: sid.polarity_scores(x)['compound'])
-    return df
-
-def plot_bubble(df):
-    G = nx.Graph()
-    clusters = df['cluster'].unique()
-
-    # Add nodes with cluster sizes
-    for cluster in clusters:
-        cluster_size = len(df[df['cluster'] == cluster])
-        titles = df[df['cluster'] == cluster]['title'].tolist()
-        G.add_node(f'Cluster {cluster}', 
-                  size=cluster_size*1.5,
-                  color=px.colors.qualitative.Light24[int(cluster) % 24],
-                  titles=titles)
-
-    # Calculate packed bubble layout
-    pos = {}
-    nodes_by_size = sorted(G.nodes(data=True), key=lambda x: x[1]['size'], reverse=True)
-
-    # Initialize with largest bubble in center
-    center_node = nodes_by_size[0][0]
-    pos[center_node] = (0, 0)
-
-    # Place remaining bubbles in a spiral pattern around center
-    angle = 0
-    radius = 0.2
-    spiral_constant = 0.2
-
-    for i, (node, data) in enumerate(nodes_by_size[1:], 1):
-        # Calculate spiral position
-        angle += 2.4  # Golden angle in radians
-        radius += spiral_constant / (i + 1)  # Gradually increase radius
-        
-        # Convert polar to cartesian coordinates
-        x = radius * np.cos(angle)
-        y = radius * np.sin(angle)
-        
-        # Add some random jitter to make it look more natural
-        jitter_x = np.random.normal(-1, 0.5) if i%2 == 0 else np.random.normal(1, 0.5)
-        jitter_y = np.random.uniform(-0.25, 0.25)
-        
-        pos[node] = (x + jitter_x, y + jitter_y)
-    
-    # Create visualization
-    fig_network = go.Figure()
-
-    # Add nodes
-    node_x = []
-    node_y = []
-    node_text = []
-    node_size = []
-    node_color = []
-    hover_text = []
-
-    for node in G.nodes():
-        x, y = pos[node]
-        node_x.append(x)
-        node_y.append(y)
-        node_text.append(node)
-        node_size.append(G.nodes[node]['size'])
-        node_color.append(G.nodes[node]['color'])
-        titles = '<br>'.join(G.nodes[node]['titles'][:10])
-        hover_text.append(f"{node}<br>{titles}")
-
-    fig_network.add_trace(go.Scatter(
-        x=node_x,
-        y=node_y,
-        mode='markers',
-        hoverinfo='text',
-        text=hover_text,
-        marker=dict(
-            size=node_size,
-            color=node_color,
-            line=dict(width=2, color='white'),
-            opacity=0.7
-        )
-    ))
-
-    # Update layout
-    fig_network.update_layout(
-        showlegend=False,
-        hovermode='closest',
-        height=1000,  # Increase height for better spacing
-        width=800,
-        plot_bgcolor='white',
-        xaxis=dict(
-            showgrid=False, 
-            zeroline=False, 
-            showticklabels=False,
-            range=[-3, 3]  # Control horizontal spread
-        ),
-        yaxis=dict(
-            showgrid=False, 
-            zeroline=False, 
-            showticklabels=False,
-            range=[-1, 1]  # Adjust vertical range
-        ),
-        margin=dict(l=20, r=20, t=40, b=20)
-    )
-
-    # Add hover effects
-    fig_network.update_traces(
-        hovertemplate='%{text}',
-        hoverlabel=dict(bgcolor='white', font_size=12)
-    )
-    return fig_network
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from plotting import *
 
 
 if __name__ == '__main__':
     np.random.seed(20)
+    st.set_page_config(layout="wide", page_title="Vax Vibes")
+    tab1, tab2, tab3 = st.tabs(["README", "Dashboard", "Patient Journey"])
 
-    # df = process_data()
-    # df.to_csv('sentiment_tag.csv')
+    with tab2:
+        # df = process_data()"Do you think the reduction in deaths and improved health shown here could be possible without vaccines?"
+        # df.to_csv('sentiment_tag.csv')
 
-    # Set page configuration
-    st.set_page_config(layout="wide", page_title="Text Analysis Dashboard")
+        # Function to load and process data
+        @st.cache_data
+        def load_data():
+            # Replace with your actual data loading method
+            df = pd.read_csv('sentiment_tag.csv')
+            df['embeddings'] = df['embeddings'].apply(ast.literal_eval)
+            return df
+        
+        # Load data
+        df = load_data()
 
-    # Function to load and process data
-    @st.cache_data
-    def load_data():
-        # Replace with your actual data loading method
-        df = pd.read_csv('sentiment_tag.csv')
-        df['embeddings'] = df['embeddings'].apply(ast.literal_eval)
-        return df
-    
-    # Load data
-    df = load_data()
+        # Title
+        st.title("Vax Vibes")
 
-    # Title
-    st.title("Vax Vibes")
+        # Cluster Network and Topic Distribution
+        # Cluster Network
+        st.subheader("Topic Clusters")
 
-    # Cluster Network and Topic Distribution
-    # Cluster Network
-    st.subheader("Topic Clusters")
+        bubbles = plot_bubble(df)
+        st.plotly_chart(bubbles, use_container_width=True)
 
-    bubbles = plot_bubble(df)
-    st.plotly_chart(bubbles, use_container_width=True)
+        st.subheader("Hot Topics")
+        col1, col2 = st.columns([1,3])
+        cluster = col1.selectbox("Choose your cluster", sorted(df['cluster'].unique()))
+        sub = df[df['cluster']==cluster].sort_values(['neutral'])
+        # Sentiment Distribution
+        sentiment_data = pd.DataFrame({
+            'Sentiment': ['Negative', 'Positive'],
+            'Value': [
+                sub['negative'].mean(),
+                sub['positive'].mean()
+            ]
+        })
+        
+        fig_sentiment = px.pie(
+            sentiment_data,
+            values='Value',
+            names='Sentiment',
+            hole=0.6,
+            color_discrete_sequence=px.colors.qualitative.G10
+        )
+        col1.plotly_chart(fig_sentiment, use_container_width=True)
 
-    st.subheader("Hot Topics")
-    col1, col2 = st.columns([1,5])
-    cluster = col1.selectbox("Choose your cluster", sorted(df['cluster'].unique()))
-    sub = df[df['cluster']==cluster].sort_values(['neutral'])
-    # Sentiment Distribution
-    sentiment_data = pd.DataFrame({
-        'Sentiment': ['Negative', 'Positive'],
-        'Value': [
-            sub['negative'].mean(),
-            sub['positive'].mean()
-        ]
-    })
-    
-    fig_sentiment = px.pie(
-        sentiment_data,
-        values='Value',
-        names='Sentiment',
-        hole=0.6,
-        color_discrete_sequence=px.colors.qualitative.G10
-    )
-    col2.plotly_chart(fig_sentiment, use_container_width=True)
+        count, top = 0, 15
+        # Format each post as a card
+        for _, row in sub.iterrows():
+            count += 1
+            if count < top:
+                # Create container with flexbox layout
+                col2.markdown(
+                    f"""
+                    <div style='display: flex; 
+                                justify-content: space-between; 
+                                align-items: center; 
+                                margin-bottom: 10px;'>
+                        <div style='flex-grow: 1;'>{row['title']}</div>
+                        <a href='{row['url']}' 
+                        target='_blank' 
+                        style='color: #FF0000; 
+                                text-decoration: none; 
+                                font-size: 12px; 
+                                white-space: nowrap;
+                                margin-left: 15px;'>
+                            Read More
+                        </a>
+                    </div>
+                    """, 
+                    unsafe_allow_html=True
+                )
 
-    count, top = 0, 10
-    # Format each post as a card
-    for _, row in sub.iterrows():
-        count += 1
-        if count < top:
-            a, b = st.columns([1,1])
-            col = a if count < top/2 else b
-            col.write(row['title'], unsafe_allow_html=True)
-            if col.button("Read More", key=row['url']):
-                webbrowser.open_new_tab(row['url'])
-    
-    st.subheader(f"Tell Me More")
-    st.write(sub[['title','url','negative','positive','neutral']], use_container_width=True)
+        # Create the Streamlit interface
+        st.subheader("💉 My Viral Tweet")
+
+        # User input section
+        user_input = st.text_area(
+            "What are you thinking right now?",
+            height=100,
+        )
+
+        # Load data
+        df = load_tweet_data()
+
+        if user_input and len(user_input) > 0:
+            # Get similar tweets
+            similar_tweets = get_similar_tweets(user_input, df)
+            for idx, row in similar_tweets.iterrows():
+                display_tweet(row['tweet_text'], row['label'], idx)
+
+        # Add some styling
+        st.markdown("""
+        <style>
+            .stButton button {
+                width: 100%;
+                border-radius: 20px;
+            }
+            .stTextArea textarea {
+                border-radius: 10px;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        st.subheader(f"Tell Me More")
+        st.write(sub[['title','url','negative','positive','neutral']], use_container_width=True)
+
+    with tab3:
+        C1, C2 = st.columns([1,1])
+        with C1:
+            with open('patient_journey.json', 'r') as f:
+                touch_points = json.load(f)
+            st.write(touch_points)
+        with C2:
+            # Define the data points - keeping them relatively close together
+            quadrant_data = [
+                ('START', 0.28, 0.19),
+                ('1', 0.32, 0.32),
+                ('2', 0.39, 0.43),
+                ('3', 0.33, 0.57),
+                ('END', 0.43, 0.64)
+            ]
+            q_points = pd.DataFrame(quadrant_data, columns=['Name', 'Skeptic-to-Pro', 'Passive-to-Proactive'])
+            
+            quad_chart = create_quadrant_chart(q_points)
+            st.plotly_chart(quad_chart, use_container_width=True)
+            point = st.selectbox("Select Touchpoint to Vie", q_points['Name'], index=None)
+            if point == '2':
+                st.write("`RAG Agent Triggered` Logic/Reason")
+                st.write("Agent deduced that the patient wanted to know more about realized health benefits of vaccinations.")
+                cap1, cap2 = st.columns([2,1])
+                cap1.image('show_patient.png',
+                         caption='https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(24)00850-X/fulltext')
+                cap2.write('This chart shows how vaccines have saved lives and improved health worldwide from 1974 to 2024. The orange part is the biggest, showing how the measles vaccine has saved millions of lives, added billions of years of life, and helped people stay healthy for longer.')
+                st.write("`Question Triggered` Do you think the reduction in deaths and improved health shown here could be possible without vaccines?")
+                st.write("`Patient Response` [SOMEWHAT LIKELY]")
