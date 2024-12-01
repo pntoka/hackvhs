@@ -1,7 +1,15 @@
-# hackvhs
-Fetch.ai x IX hackathon
+# 🚀 **HackVHS: Fetch.ai x IX Hackathon** 🎉
 
-To run the demo:
+**Create your .env file**
+```.env
+CLIENT_KEY="apple"
+PROFILING_AGENT_KEY = "kiwis"
+RAG_AGENT_KEY = "chickens"
+OPENAI_API_KEY="your_api_key"
+VECTARA_API = "zut_I9uYzUybNaZNP_5_LGJ13ylo8Reaxm7FRinmkA"
+AGENTVERSE_API_KEY="your_agentverse_api_key"
+```
+**To run the demo:**
 
 1. Run the profiling and RAG agents
 - `agents/profiling_agent.py`
@@ -14,4 +22,6 @@ To run the demo:
 3. Run orchestrator (`agents/orchestrator_agent.py`)
 
 4. Run the frontend app
-`$ streamlit run viz/app.py`
+```
+$ streamlit run viz/app.py
+```
